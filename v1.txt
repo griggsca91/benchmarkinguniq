@@ -1,0 +1,6 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/griggsca91/gobenchmarkexample/uniq
+BenchmarkUniq-8   	      19	  56294248 ns/op	38634749 B/op	    2271 allocs/op
+PASS
+ok  	github.com/griggsca91/gobenchmarkexample/uniq	3.938s
