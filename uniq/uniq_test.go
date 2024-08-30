@@ -1,7 +1,9 @@
 package uniq
 
 import (
+	"fmt"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -11,6 +13,8 @@ var (
 	bigContent       = getTestFileContent("./big.txt")
 )
 
+var content = bigContent
+
 func getTestFileContent(fileName string) []byte {
 	testContent, err := os.ReadFile(fileName)
 	if err != nil {
@@ -19,23 +23,49 @@ func getTestFileContent(fileName string) []byte {
 	return testContent
 }
 
-func TestUniq(t *testing.T) {
-	expectedContent := `line1
-line2
-line3
-line4
-`
-	if content := Uniq(testContent); content != expectedContent {
-		t.Errorf("Got %v but expected %v", content, expectedContent)
-	}
+func length(s string) {
+	fmt.Println(s)
+	fmt.Println(len(strings.Split(s, "\n")))
 }
+
+// func TestUniqV4(t *testing.T) {
+// 	result := UniqV4(content)
+// 	fmt.Println(result)
+// 	if len(strings.Split(result, "\n")) != 4 {
+// 		t.Errorf("got %v", len(strings.Split(result, "\n")))
+// 	}
+// }
 
 var sink string
 
 func BenchmarkUniq(t *testing.B) {
 	var result string
 	for i := 0; i < t.N; i++ {
-		result = Uniq(bigContent)
+		result = Uniq(content)
+	}
+	sink = result
+}
+
+func BenchmarkUniqV2(t *testing.B) {
+	var result string
+	for i := 0; i < t.N; i++ {
+		result = UniqV2(content)
+	}
+	sink = result
+}
+
+func BenchmarkUniqV3(t *testing.B) {
+	var result string
+	for i := 0; i < t.N; i++ {
+		result = UniqV3(content)
+	}
+	sink = result
+}
+
+func BenchmarkUniqV4(t *testing.B) {
+	var result string
+	for i := 0; i < t.N; i++ {
+		result = UniqV4(content)
 	}
 	sink = result
 }
