@@ -76,5 +76,4 @@ func BenchmarkUniqV5(t *testing.B) {
 		result = UniqV5(content)
 	}
 	sink = result
-	// length(sink)
 }

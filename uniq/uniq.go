@@ -114,8 +114,7 @@ func UniqV5(content []byte) string {
 
 	var startPosition int
 
-	var sb strings.Builder
-	sb.Grow(len(content) / 2)
+	str := make([]byte, 0, len(content)/10)
 
 	for i, b := range content {
 		if b != '\n' {
@@ -130,11 +129,11 @@ func UniqV5(content []byte) string {
 
 		if _, ok := cache[hash]; !ok {
 			cache[hash] = struct{}{}
-			sb.Write(lineBytes)
-			sb.WriteByte('\n')
+			str = append(str, lineBytes...)
+			str = append(str, '\n')
 		}
 		startPosition = i + 1
 	}
 
-	return sb.String()
+	return unsafe.String(unsafe.SliceData(str), len(str))
 }
