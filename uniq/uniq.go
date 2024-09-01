@@ -110,7 +110,7 @@ func UniqV5(content []byte) string {
 	// 25 is faster, but uses more memory
 	// 40 uses less memory but small trade off for perf, which is ok
 	// 100 uses less memory even more, but speed gains start to go down noticiable, maybe worth making this and env variable if we care that much
-	cache := make(map[uint32]struct{}, len(content)/100)
+	cache := make(map[uint32]struct{}, len(content)/40)
 
 	var startPosition int
 
@@ -122,7 +122,12 @@ func UniqV5(content []byte) string {
 			continue
 		}
 		lineBytes := content[startPosition:i]
-		hash := HashFnv1a(lineBytes)
+		var hash uint32 = 2166136261
+		for _, c := range lineBytes {
+			hash ^= uint32(c)
+			hash *= 16777619
+		}
+
 		if _, ok := cache[hash]; !ok {
 			cache[hash] = struct{}{}
 			sb.Write(lineBytes)
