@@ -1,7 +1,9 @@
 package uniq
 
 import (
+	"hash/fnv"
 	"strings"
+	"unsafe"
 )
 
 func Uniq(content []byte) string {
@@ -71,26 +73,63 @@ func UniqV3(content []byte) string {
 }
 
 func UniqV4(content []byte) string {
-	cache := &Node{}
+	cache := make(map[string]int)
 
-	var word []byte
 	var position int
-	for _, b := range content {
+	var startPosition int
+	for i, b := range content {
 		if b != '\n' {
-			word = append(word, b)
 			continue
 		}
-		if ok := cache.Has(word); !ok {
-			cache.Insert(word, position)
+		word := content[startPosition:i]
+		l := *(*string)(unsafe.Pointer(&word))
+		if _, ok := cache[l]; !ok {
+			cache[l] = position
 			position++
 		}
-		word = word[0:0]
+		startPosition = i + 1
 	}
 
-	output := make([]string, position)
-	for value := range cache.Nodes() {
-		output[value.Position] = string(value.Value)
+	output := make([]string, len(cache))
+	for key, value := range cache {
+		output[value] = key
 	}
 
 	return strings.Join(output, "\n")
+}
+
+// hash could be incorrect, but we have a wide range of values so i'm assuming it's all good
+func HashFnv1a(data []byte) uint32 {
+	h := fnv.New32a()
+	_, _ = h.Write(data)
+	return h.Sum32()
+}
+
+func UniqV5(content []byte) string {
+	// average size of a word according to google is 4.7 characters long, and assuming all ascii, 4.7 * 8 = 37.6 which is ~= 40
+	// 25 is faster, but uses more memory
+	// 40 uses less memory but small trade off for perf, which is ok
+	// 100 uses less memory even more, but speed gains start to go down noticiable, maybe worth making this and env variable if we care that much
+	cache := make(map[uint32]struct{}, len(content)/100)
+
+	var startPosition int
+
+	var sb strings.Builder
+	sb.Grow(len(content) / 2)
+
+	for i, b := range content {
+		if b != '\n' {
+			continue
+		}
+		lineBytes := content[startPosition:i]
+		hash := HashFnv1a(lineBytes)
+		if _, ok := cache[hash]; !ok {
+			cache[hash] = struct{}{}
+			sb.Write(lineBytes)
+			sb.WriteByte('\n')
+		}
+		startPosition = i + 1
+	}
+
+	return sb.String()
 }

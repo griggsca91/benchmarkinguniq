@@ -24,14 +24,14 @@ func getTestFileContent(fileName string) []byte {
 }
 
 func length(s string) {
-	fmt.Println(s)
+	// fmt.Println(s)
 	fmt.Println(len(strings.Split(s, "\n")))
 }
 
-// func TestUniqV4(t *testing.T) {
-// 	result := UniqV4(content)
+// func TestUniqV5(t *testing.T) {
+// 	result := UniqV5(content)
 // 	fmt.Println(result)
-// 	if len(strings.Split(result, "\n")) != 4 {
+// 	if len(strings.Split(result, "\n")) != 1137034 {
 // 		t.Errorf("got %v", len(strings.Split(result, "\n")))
 // 	}
 // }
@@ -68,4 +68,13 @@ func BenchmarkUniqV4(t *testing.B) {
 		result = UniqV4(content)
 	}
 	sink = result
+}
+
+func BenchmarkUniqV5(t *testing.B) {
+	var result string
+	for i := 0; i < t.N; i++ {
+		result = UniqV5(content)
+	}
+	sink = result
+	// length(sink)
 }
